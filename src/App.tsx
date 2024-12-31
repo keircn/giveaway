@@ -31,8 +31,6 @@ export default function App() {
           </h1>
         </motion.div>
 
-        <div className="pt-[5vh]" />
-
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -106,8 +104,6 @@ export default function App() {
           </motion.div>
         </div>
 
-        <div className="pt-[10vh]" />
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -124,19 +120,8 @@ export default function App() {
               <img
                 src="/testimonial.png"
                 alt="Testimonial"
-                className="w-[452px] h-[148px] rounded mb-4"
+                className="w-full max-w-[452px] h-auto rounded mb-4"
               />
-              <span className="text-zinc-400 mt-2">
-                -{" "}
-                <a
-                  className="text-zinc-400 mt-2 hover:underline"
-                  href="https://fakecrime.bio/wag"
-                  target="_blank"
-                >
-                  {" "}
-                  North
-                </a>
-              </span>
             </CardContent>
           </Card>
         </motion.div>
