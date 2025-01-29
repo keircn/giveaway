@@ -6,7 +6,7 @@ import { IoGiftOutline } from "react-icons/io5";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { CodeDisplay } from "@/components/CodeDisplay";
-import { tempCode } from "@/lib/code-service";
+import { getRandomCode } from "@/lib/code-service";
 
 const COOLDOWN_TIME = 300000;
 
@@ -56,13 +56,15 @@ export default function App() {
 
     localStorage.setItem("lastAttempt", now.toString());
 
-    const randomNum = Math.floor(Math.random() * 1000) + 1;
-    if (randomNum === 1) {
-      setCode(tempCode());
-      setShowCode(true);
-    } else {
-      setShowVideo(true);
-    }
+    getRandomCode().then((code) => {
+      if (code !== "") {
+        setCode(String(code));
+        console.log("Code generated:", code);
+        setShowCode(true);
+      } else {
+        setShowVideo(true);
+      }
+    });
   };
 
   if (showVideo) {
