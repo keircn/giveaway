@@ -1,13 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import VideoPlayer from "./components/VideoPlayer";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { BsArrowRight } from "react-icons/bs";
 import { IoGiftOutline } from "react-icons/io5";
-import { Card, CardHeader, CardContent } from "@/components/Card";
+import VideoPlayer from "@/components/VideoPlayer";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { CodeDisplay } from "@/components/CodeDisplay";
+import { tempCode } from "@/lib/code-service";
+
+const COOLDOWN_TIME = 300000;
 
 export default function App() {
   const [showVideo, setShowVideo] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [code, setCode] = useState("");
+  const [cooldownTime, setCooldownTime] = useState(0);
+
+  useEffect(() => {
+    const lastAttempt = localStorage.getItem("lastAttempt");
+    if (lastAttempt) {
+      const timeElapsed = Date.now() - Number.parseInt(lastAttempt, 10);
+      if (timeElapsed < COOLDOWN_TIME) {
+        setCooldownTime(Math.ceil((COOLDOWN_TIME - timeElapsed) / 1000));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cooldownTime > 0) {
+      const timer = setTimeout(() => setCooldownTime(cooldownTime - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldownTime]);
+
+  const formatCooldownTime = (seconds: number) => {
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  const handleClick = () => {
+    const now = Date.now();
+    const lastAttempt = localStorage.getItem("lastAttempt");
+
+    if (lastAttempt && now - Number.parseInt(lastAttempt, 10) < COOLDOWN_TIME) {
+      const remaining = Math.ceil(
+        (COOLDOWN_TIME - (now - Number.parseInt(lastAttempt, 10))) / 1000,
+      );
+      setCooldownTime(remaining);
+      return;
+    }
+
+    localStorage.setItem("lastAttempt", now.toString());
+
+    const randomNum = Math.floor(Math.random() * 1000) + 1;
+    if (randomNum === 1) {
+      setCode(tempCode());
+      setShowCode(true);
+    } else {
+      setShowVideo(true);
+    }
+  };
 
   if (showVideo) {
     return <VideoPlayer />;
@@ -57,10 +113,15 @@ export default function App() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-purple-500/20 transition-shadow"
-              onClick={() => setShowVideo(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-purple-500/20 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleClick}
+              disabled={cooldownTime > 0 || showCode}
             >
-              Redeem Yours
+              {cooldownTime > 0
+                ? `Try again in ${formatCooldownTime(cooldownTime)}`
+                : showCode
+                  ? "Code Generated!"
+                  : "Redeem Yours"}
               <BsArrowRight className="w-5 h-5" />
             </motion.button>
           </motion.div>
@@ -104,13 +165,25 @@ export default function App() {
           </motion.div>
         </div>
 
+        {showCode && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-12"
+          >
+            <CodeDisplay code={code} />
+          </motion.div>
+        )}
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
-          className="mt-24"
+          className="mt-24 relative"
         >
-          <Card className="bg-[#0F0F13] border border-gray-800">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl rounded-full max-w-xl" />
+          <Card className="relative bg-[#0F0F13] border border-gray-800 max-w-xl">
             <CardHeader className="text-center">
               <h2 className="text-3xl font-bold text-white">
                 Don't believe us?
