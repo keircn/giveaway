@@ -8,8 +8,6 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { CodeDisplay } from "@/components/CodeDisplay";
 import { getRandomCode } from "@/lib/code-service";
 
-const COOLDOWN_TIME = 300000;
-
 export default function App() {
   const [showVideo, setShowVideo] = useState(false);
   const [showCode, setShowCode] = useState(false);
@@ -17,13 +15,7 @@ export default function App() {
   const [cooldownTime, setCooldownTime] = useState(0);
 
   useEffect(() => {
-    const lastAttempt = localStorage.getItem("lastAttempt");
-    if (lastAttempt) {
-      const timeElapsed = Date.now() - Number.parseInt(lastAttempt, 10);
-      if (timeElapsed < COOLDOWN_TIME) {
-        setCooldownTime(Math.ceil((COOLDOWN_TIME - timeElapsed) / 1000));
-      }
-    }
+    checkCooldown();
   }, []);
 
   useEffect(() => {
@@ -42,22 +34,11 @@ export default function App() {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  const handleClick = () => {
-    const now = Date.now();
-    const lastAttempt = localStorage.getItem("lastAttempt");
-
-    if (lastAttempt && now - Number.parseInt(lastAttempt, 10) < COOLDOWN_TIME) {
-      const remaining = Math.ceil(
-        (COOLDOWN_TIME - (now - Number.parseInt(lastAttempt, 10))) / 1000,
-      );
-      setCooldownTime(remaining);
-      return;
-    }
-
-    localStorage.setItem("lastAttempt", now.toString());
-
-    getRandomCode().then((code) => {
-      if (code !== "") {
+  const checkCooldown = () => {
+    getRandomCode().then(({ code, timeLeft }) => {
+      if (timeLeft) {
+        setCooldownTime(Math.ceil(timeLeft / 1000));
+      } else if (code) {
         setCode(String(code));
         console.log("Code generated:", code);
         setShowCode(true);
@@ -67,9 +48,9 @@ export default function App() {
     });
   };
 
-  if (showVideo) {
-    return <VideoPlayer />;
-  }
+  const handleClick = () => {
+    checkCooldown();
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0B0E] text-white">
@@ -175,6 +156,17 @@ export default function App() {
             className="mt-12"
           >
             <CodeDisplay code={code} />
+          </motion.div>
+        )}
+
+        {showVideo && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mt-12"
+          >
+            <VideoPlayer />
           </motion.div>
         )}
 
