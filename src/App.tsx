@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { animate, motion } from "framer-motion";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { BsArrowRight } from "react-icons/bs";
 import { IoGiftOutline } from "react-icons/io5";
@@ -13,10 +13,7 @@ export default function App() {
   const [showCode, setShowCode] = useState(false);
   const [code, setCode] = useState("");
   const [cooldownTime, setCooldownTime] = useState(0);
-
-  useEffect(() => {
-    checkCooldown();
-  }, []);
+  const [isRequesting, setIsRequesting] = useState(false);
 
   useEffect(() => {
     if (cooldownTime > 0) {
@@ -34,8 +31,12 @@ export default function App() {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  const checkCooldown = () => {
+  const handleClick = () => {
+    if (isRequesting) return;
+
+    setIsRequesting(true);
     getRandomCode().then(({ code, timeLeft }) => {
+      setIsRequesting(false);
       if (timeLeft) {
         setCooldownTime(Math.ceil(timeLeft / 1000));
       } else if (code) {
@@ -48,12 +49,9 @@ export default function App() {
     });
   };
 
-  const handleClick = () => {
-    checkCooldown();
-  };
-
   return (
     <div className="min-h-screen bg-[#0B0B0E] text-white">
+      {showVideo && <VideoPlayer />}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -64,6 +62,8 @@ export default function App() {
             src="/e-z.svg"
             alt="E-Z Services"
             className="h-20 w-20 md:h-24 md:w-24"
+            role="button"
+            onClick={() => window.open("https://e-z.software", "_blank")}
           />
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
             E-Z Services Giveaway
@@ -115,13 +115,14 @@ export default function App() {
             transition={{ delay: 0.4 }}
             className="relative"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl rounded-full" />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl rounded" />
             <div className="relative bg-[#0F0F13] p-8 rounded-2xl border border-gray-800">
               <div className="flex items-center gap-4 mb-6">
                 <IoGiftOutline className="w-12 h-12 text-purple-400" />
                 <div>
-                  <h3 className="text-xl font-semibold">What You'll Get</h3>
-                  <p className="text-gray-400">Services we provide</p>
+                  <h3 className="text-xl font-semibold">
+                    Some features we provide
+                  </h3>
                 </div>
               </div>
 
@@ -137,9 +138,9 @@ export default function App() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.6 + index * 0.1 }}
-                    className="flex items-center gap-3"
+                    className="flex items-center gap-3 ml-4"
                   >
-                    <div className="w-2 h-2 rounded-full bg-purple-400" />
+                    <div className="w-2 h-2 rounded-full mt-1 bg-purple-400" />
                     <span className="text-gray-300">{benefit}</span>
                   </motion.li>
                 ))}
@@ -159,24 +160,13 @@ export default function App() {
           </motion.div>
         )}
 
-        {showVideo && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-12"
-          >
-            <VideoPlayer />
-          </motion.div>
-        )}
-
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8 }}
           className="mt-24 relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl rounded-full max-w-xl" />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-3xl rounded max-w-xl" />
           <Card className="relative bg-[#0F0F13] border border-gray-800 max-w-xl">
             <CardHeader className="text-center">
               <h2 className="text-3xl font-bold text-white">
@@ -202,6 +192,15 @@ export default function App() {
           <p>
             Limited spots available. Don't miss out on this exclusive
             opportunity.
+          </p>
+          <p className="mt-4 text-zinc-50">
+            Made with <span role="img">❤️</span> by{" "}
+            <a
+              href="https://github.com/keirim"
+              className="bg-gradient-to-br from-purple-400 to-pink-600 bg-clip-text text-transparent"
+            >
+              Keiran
+            </a>
           </p>
         </motion.div>
       </div>
