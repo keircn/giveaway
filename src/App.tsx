@@ -1,56 +1,16 @@
-import { useState, useEffect } from "react";
-import { animate, motion } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { BsArrowRight } from "react-icons/bs";
 import { IoGiftOutline } from "react-icons/io5";
 import VideoPlayer from "@/components/VideoPlayer";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { CodeDisplay } from "@/components/CodeDisplay";
-import { getRandomCode } from "@/lib/code-service";
 
 export default function App() {
   const [showVideo, setShowVideo] = useState(false);
-  const [showCode, setShowCode] = useState(false);
-  const [code, setCode] = useState("");
-  const [cooldownTime, setCooldownTime] = useState(0);
-  const [isRequesting, setIsRequesting] = useState(false);
-
-  useEffect(() => {
-    if (cooldownTime > 0) {
-      const timer = setTimeout(() => setCooldownTime(cooldownTime - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [cooldownTime]);
-
-  const formatCooldownTime = (seconds: number) => {
-    if (seconds < 60) {
-      return `${seconds}s`;
-    }
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
-
-  const handleClick = () => {
-    if (isRequesting) return;
-
-    setIsRequesting(true);
-    getRandomCode().then(({ code, timeLeft }) => {
-      setIsRequesting(false);
-      if (timeLeft) {
-        setCooldownTime(Math.ceil(timeLeft / 1000));
-      } else if (code) {
-        setCode(String(code));
-        console.log("Code generated:", code);
-        setShowCode(true);
-      } else {
-        setShowVideo(true);
-      }
-    });
-  };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0E] text-white">
+    <div className="min-h-screen bg-background text-foreground">
       {showVideo && <VideoPlayer />}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <motion.div
@@ -63,7 +23,7 @@ export default function App() {
             alt="E-Z Services"
             className="h-20 w-20 md:h-24 md:w-24"
             role="button"
-            onClick={() => window.open("https://e-z.software", "_blank")}
+            onClick={() => window.open("https://e-z.gg", "_blank")}
           />
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
             E-Z Services Giveaway
@@ -97,14 +57,9 @@ export default function App() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-full font-semibold text-lg shadow-lg hover:shadow-purple-500/20 transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleClick}
-              disabled={cooldownTime > 0 || showCode}
+              onClick={() => setShowVideo(true)}
             >
-              {cooldownTime > 0
-                ? `Try again in ${formatCooldownTime(cooldownTime)}`
-                : showCode
-                  ? "Code Generated!"
-                  : "Redeem Yours"}
+              Redeem Yours
               <BsArrowRight className="w-5 h-5" />
             </motion.button>
           </motion.div>
@@ -148,17 +103,6 @@ export default function App() {
             </div>
           </motion.div>
         </div>
-
-        {showCode && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-12"
-          >
-            <CodeDisplay code={code} />
-          </motion.div>
-        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
