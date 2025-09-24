@@ -134,13 +134,12 @@ export default function App() {
           className="mt-24 text-center text-gray-400"
         >
           <p>
-            Limited spots available. Don't miss out on this exclusive
-            opportunity.
+            Limited invites available, don't miss out.
           </p>
           <p className="mt-4 text-zinc-50">
-            Made with <span role="img">❤️</span> by{" "}
+            Made with <span role="img">♡</span> by{" "}
             <a
-              href="https://github.com/keirim"
+              href="https://keircn.com"
               className="bg-gradient-to-br from-purple-400 to-pink-600 bg-clip-text text-transparent"
             >
               Keiran
